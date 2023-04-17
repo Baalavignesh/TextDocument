@@ -13,31 +13,16 @@ namespace TextDocument.Controllers
     {
         // GET: api/<WriteDataController>
         [HttpPost]
-        public DocumentData Post([FromBody] DocumentData d1)
+        public async Task<DocumentData> PostAsync([FromBody] DocumentData d1)
         {
             FirebaseConfig f1 = new FirebaseConfig();
+
+            DocumentReference docRef = f1.database.Collection("UserData").Document(d1.name);
+
             Dictionary<string, object> textInfo = new Dictionary<string, object>
             {
                 { "TextData", d1.documentText }
             };
-
-
-            DocumentReference docRef = f1.database.Collection("UserData").Document(d1.name);
-            DocumentSnapshot snapshot = docRef.GetSnapshotAsync();
-            if (snapshot.Exists)
-            {
-                Console.WriteLine("Document data for {0} document:", snapshot.Id);
-                Dictionary<string, object> city = snapshot.ToDictionary();
-                foreach (KeyValuePair<string, object> pair in city)
-                {
-                    Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Document {0} does not exist!", snapshot.Id);
-            }
-
 
 
             DocumentReference docRef2 = f1.database.Collection("UserData").Document(d1.name);
