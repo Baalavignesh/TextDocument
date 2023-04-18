@@ -18,22 +18,54 @@ namespace TextDocument.Controllers
             FirebaseConfig f1 = new FirebaseConfig();
 
             DocumentReference docRef = f1.database.Collection("UserData").Document(d1.name);
-
+            // change this to create multiple documents
             Dictionary<string, object> textInfo = new Dictionary<string, object>
             {
-                { "TextData", d1.documentText }
+                { d1.fileName, d1.fileContent }
             };
 
+            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
 
-            DocumentReference docRef2 = f1.database.Collection("UserData").Document(d1.name);
-            docRef2.SetAsync(textInfo);
+            if(snapshot.Exists)
+            {
+                Dictionary<string, object> data = snapshot.ToDictionary();
+                Console.WriteLine("File Exists");
+                Console.WriteLine(d1.OldFileName);
+
+                if (data.ContainsKey(d1.OldFileName) && d1.OldFileName != d1.fileName)
+                {
+                    Console.WriteLine("Field Already Exists");
+                    Dictionary<string, object> updates = new Dictionary<string, object>
+                    {
+                        { d1.OldFileName, FieldValue.Delete }
+                    };
+                    await docRef.UpdateAsync(updates);
+                }
+                
+                
+                Dictionary<string, object> newData = new Dictionary<string, object>
+                {
+                    {d1.fileName, d1.fileContent},
+                };
+                
+                await docRef.UpdateAsync(newData);
+                
+
+
+
+            }
+
+
 
 
 
             return new DocumentData
             {
                 name = d1.name,
-                documentText = d1.documentText   
+                fileName = d1.fileName,
+                fileContent = d1.fileContent,
+                OldFileName = d1.OldFileName,
+                isSuccess = true,
             };
         }
 
